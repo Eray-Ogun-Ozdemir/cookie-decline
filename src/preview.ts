@@ -35,7 +35,7 @@ function update() {
     childList: true,
     characterData: true,
     attributes: true,
-    attributeFilter: ['class', 'style', 'hidden', 'disabled', 'aria-hidden', 'aria-disabled', 'aria-label', 'open', 'inert'],
+    attributeFilter: ['class', 'id', 'style', 'hidden', 'disabled', 'aria-hidden', 'aria-disabled', 'aria-label', 'aria-checked', 'checked', 'role', 'open', 'inert'],
   });
   schedule();
 }

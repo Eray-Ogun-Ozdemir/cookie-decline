@@ -1,4 +1,4 @@
-const ACTIONABLE = 'button, a[href], [role="button"], input[type="button"], input[type="submit"]';
+export const ACTIONABLE = 'button, a[href], [role="button"], input[type="button"], input[type="submit"]';
 
 const CMP_CONTAINERS = [
   '#onetrust-banner-sdk',
@@ -8,6 +8,9 @@ const CMP_CONTAINERS = [
   '#usercentrics-root',
   '.osano-cm-dialog',
   '[data-testid="uc-banner"]',
+  '.fc-consent-root',
+  '.fc-dialog',
+  '.qc-cmp2-container',
 ].join(',');
 
 export function normalize(value: string): string {
@@ -33,7 +36,7 @@ export function isRejectLabel(label: string): boolean {
   return REJECT_LABELS.has(normalize(label));
 }
 
-function labelOf(element: HTMLElement): string {
+export function labelOf(element: HTMLElement): string {
   const ariaLabel = element.getAttribute('aria-label');
   if (ariaLabel !== null) return ariaLabel;
   const labelledBy = element.getAttribute('aria-labelledby');
@@ -56,12 +59,14 @@ export function isVisible(element: HTMLElement): boolean {
   return true;
 }
 
-function hasCookieContext(button: HTMLElement): boolean {
+export function cookieContext(button: HTMLElement): HTMLElement | null {
   const view = button.ownerDocument.defaultView;
-  if (!view) return false;
+  if (!view) return null;
   let container = button.parentElement;
   for (let depth = 0; container && depth < 8; depth++, container = container.parentElement) {
     if (container.tagName === 'BODY' || container.tagName === 'HTML') break;
+    // Known CMP panels can be long and may describe personal data rather than cookies.
+    if (container.matches(CMP_CONTAINERS)) return container;
     const text = normalize(container.textContent || '');
     const hasCookieText = /\b(cookie\w*|cerez\w*)\b/.test(text);
     if (!hasCookieText || text.length > 8000) continue;
@@ -70,22 +75,21 @@ function hasCookieContext(button: HTMLElement): boolean {
       || /cookie|cerez|consent/.test(identifier);
     const dialog = container.matches('dialog[open], [role="dialog"], [role="alertdialog"], [aria-modal="true"]');
     const position = view.getComputedStyle(container).position;
-    if (explicitContainer || dialog || position === 'fixed' || position === 'sticky') return true;
+    if (explicitContainer || dialog || position === 'fixed' || position === 'sticky') return container;
   }
-  return false;
+  return null;
+}
+
+export function isAvailable(element: HTMLElement): boolean {
+  if (element.matches(':disabled, [disabled], [aria-disabled="true"]')
+    || element.closest('[aria-disabled="true"]') || !isVisible(element)) return false;
+  return element.tagName !== 'A' || (element.getAttribute('href') || '').startsWith('#');
 }
 
 export function findRejectButtons(document: Document): HTMLElement[] {
   const results: HTMLElement[] = [];
   for (const element of document.querySelectorAll<HTMLElement>(ACTIONABLE)) {
-    if (element.matches(':disabled, [disabled], [aria-disabled="true"]')
-      || element.closest('[aria-disabled="true"]')
-      || !isRejectLabel(labelOf(element)) || !isVisible(element) || !hasCookieContext(element)) continue;
-    // A navigation link must stay on this document. Never follow a rejection-labelled external URL.
-    if (element.tagName === 'A') {
-      const href = element.getAttribute('href') || '';
-      if (href !== '#' && !href.startsWith('#')) continue;
-    }
+    if (!isRejectLabel(labelOf(element)) || !isAvailable(element) || !cookieContext(element)) continue;
     results.push(element);
   }
   return results;

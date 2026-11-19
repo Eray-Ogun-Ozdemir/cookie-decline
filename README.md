@@ -1,6 +1,6 @@
 # Çerez Reddet
 
-Türkçe, İngilizce ve Almanca çerez bildirimlerindeki açık ret seçeneklerine otomatik tıklayan Chrome eklentisi. TypeScript, HTML ve CSS ile yazılır; Manifest V3 kullanır.
+Türkçe, İngilizce ve Almanca çerez bildirimlerini ve tanınan site içi bildirim izni isteklerini yöneten Chrome eklentisi. TypeScript, HTML ve CSS ile yazılır; Manifest V3 kullanır.
 
 ## VS Code ile başlangıç
 
@@ -21,7 +21,7 @@ Bu çalışma alanında bağımlılıklar önceden yüklendiyse yalnızca `npm r
 npm run preview
 ```
 
-**http://127.0.0.1:4174** adresini istediğin tarayıcıda aç. Bu mod, eklentiyle aynı ret kurallarını yalnızca örnek sayfada çalıştırır; eklenti kurmak gerekmez. Üstteki anahtarla otomatik reddetmeyi durdurup açabilirsin. Üç dili, gecikmeli pencereyi ve ilgisiz düğmeye dokunulmamasını burada deneyebilirsin.
+**http://127.0.0.1:4174** adresini istediğin tarayıcıda aç. Bu mod, eklentiyle aynı ret kurallarını yalnızca örnek sayfada çalıştırır; eklenti kurmak gerekmez. Üstteki anahtarla otomatik işlemleri durdurup açabilirsin. Üç dili, gecikmeli pencereyi, çok adımlı tercihleri ve üst üste gelen iki izin isteğini burada deneyebilirsin.
 
 Önizleme Chrome'un eklenti izinlerini ve eklenti menüsünü sınamaz; bunlar ayrı tarayıcı testiyle veya Chrome'a yükleyerek kontrol edilir. `npm run demo` ise gerçek eklenti için kullanılan, kendi kendine reddetme yapmayan sayfadır.
 
@@ -46,7 +46,8 @@ Chrome'da **http://127.0.0.1:4173** adresini aç.
 - Her dil için **Pencereyi göster** düğmesine bas; sonuç **Reddedildi** olmalı.
 - **2 saniye sonra göster** ile sonradan ekrana gelen pencereyi dene.
 - Eklentiyi kapatıp pencereyi göster; pencere açık kalmalı. Tekrar açınca reddedilmeli.
-- **Yalnızca tercihler** penceresi açık kalmalı; bu sürüm tercih menülerini yönetmez.
+- **Seçenekleri yönet akışı** ile reklam, analitik ve meşru menfaat anahtarları kapatılıp seçimler kaydedilmeli; zorunlu çerezler açık kalmalı.
+- **İki pencereyi birlikte göster** ile bildirim isteğinde **Daha Sonra** seçilmeli, çerez tercihleri ayrıca reddedilmeli.
 - Çerez penceresi dışındaki **Reject all** düğmesine otomatik tıklanmamalı.
 
 Sayfa yalnızca deneme içindir; gerçek çerez veya takip isteği oluşturmaz. Gerçek sitelerde mevcut çerez tercihi varsa pencere yeniden çıkmayabilir. İlk denemede kendi örnek sayfamızı kullan.
@@ -65,14 +66,17 @@ Gerçek tarayıcıyla uçtan uca test için bir kez `npx playwright install chro
 
 TypeScript değişiklikleri `dev` ile derlenir. HTML, CSS veya manifest değiştiğinde `npm run build` çalıştır. Sonra `chrome://extensions` üzerinden eklentiyi yeniden yükle ve denediğin web sayfasını yenile. VS Code'da varsayılan derleme görevi de hazırdır.
 
-## İlk sürümün kapsamı
+## Sürüm 0.2'nin kapsamı
 
 - Yalnızca tanınan tam düğme metinlerine tıklar: örneğin **Tümünü reddet**, **Reject all**, **Alle ablehnen**, **Yalnızca gerekli çerezler**.
 - Tıklamak için bir çerez bildirimi bağlamı arar; kabul et, genel kapat ve belirsiz düğmelere tıklamaz.
+- Doğrudan ret yoksa tanınan **Seçenekleri yönetin / Manage options / Optionen verwalten** düğmesini açar. Yalnızca anlamını tanıdığı izin anahtarlarını kapatır; zorunlu çerezlere dokunmaz. Görünür denetimlerin anlamı ve durumu biliniyorsa seçimleri kaydeder; belirsiz veya kapatılamayan bir denetim varsa kaydetmez.
+- Google Funding Choices ekranındaki izin ve meşru menfaat denetimleri desteklenir. Görünmez HTML kutularının görünür etiketleri üzerinden işlem yapılır. Ters anlamlı itiraz/opt-out kutularına otomatik müdahale edilmez.
+- Site içindeki bildirim izni pencerelerinde **Daha Sonra / Not now / Jetzt nicht** gibi seçenekler tanınır. Netmera'nın çerçeve içindeki özel düğmesi de desteklenir. Bu işlem site isteğini erteler; kalıcı bildirim engeli oluşturmaz ve tarayıcının kendi izin penceresine müdahale etmez.
 - Gizli veya devre dışı düğmelere tıklamaz. Aynı düğmeyi tekrar tekrar tıklamaz.
 - Sonradan eklenen/değişen pencereleri izler; eşleşen HTTP/HTTPS iframe belgelerinde de çalışır.
 - Pencereyi kendisi silmez veya gizlemez; sitenin kendi ret düğmesini çalıştırır. Bu, sitenin ret kararına uyduğunu ya da ağdaki tüm takibin engellendiğini doğrulamaz.
-- Çok adımlı tercih menüleri, Shadow DOM ve tüm siteler desteklenmez. Siteye özel kurallar sonraki sürüme eklenebilir.
+- Tüm tercih menüleri ve Shadow DOM desteklenmez. Birçok site farklı metinler veya özel arayüzler kullanır; bunlar için ayrıca doğrulanmış kurallar gerekir. Açılan bir tercih akışı 30 saniye/100 adım sınırında durur.
 - Daha önce kaydedilmiş çerezleri silmez, ağ isteklerini engellemez ve zorunlu çerezleri kaldırmaz.
 
 ## İzinler ve veriler
@@ -85,6 +89,8 @@ Sunucu, hesap, yapay zekâ API'si, telemetri veya dışarıya veri gönderme yok
 
 - `src/rules.ts`: Düğme metinleri, görünürlük ve çerez bağlamı.
 - `src/runner.ts`: Etkinlik kontrolü ve tek tıklama davranışı.
+- `src/preferences.ts`: Çok adımlı tercih yönetimi ve izin denetimleri.
+- `src/notifications.ts`: Site içi bildirim isteğini erteleme kuralları.
 - `src/content.ts`: Sayfa izleme ve ayar değişiklikleri.
 - `src/popup.ts`, `public/popup.*`: Eklenti menüsü.
 - `public/manifest.json`: Chrome yapılandırması.

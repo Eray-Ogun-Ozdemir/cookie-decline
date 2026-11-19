@@ -20,7 +20,11 @@ const errors = [];
 async function serve() {
   const server = createServer((request, response) => {
     response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    response.end(demo);
+    response.end(request.url === '/notification' ? `<!doctype html><html lang="tr"><body>
+      <div id="notification-dlg" class="notification-wrapper"><p>Haberler için bildirimlere izin ver</p>
+      <div id="btn-later" onclick="document.body.dataset.choice='dismissed'">Daha Sonra</div>
+      <div id="btn-allow" onclick="document.body.dataset.choice='allowed'">İzin Ver</div></div>
+      </body></html>` : demo);
   });
   await new Promise((resolve, reject) => {
     server.on('error', reject);
@@ -63,12 +67,22 @@ try {
   assert.equal(await page.locator('#cookie-banner').isVisible(), false);
   console.log('PASS: geç açılan pencere reddedildi.');
 
-  await page.click('#preferences');
-  await page.waitForTimeout(450);
-  assert.equal(await page.locator('#cookie-banner').isVisible(), true);
-  assert.equal(await page.locator('#result').getAttribute('data-choice'), 'pending');
+  for (const language of ['tr', 'en', 'de']) {
+    await page.selectOption('#language', language);
+    await page.click('#preferences');
+    await page.waitForFunction(() => document.querySelector('#result').dataset.choice === 'rejected');
+    assert.equal(await page.locator('#necessary').isChecked(), true);
+    for (const id of ['marketing', 'analytics', 'legitimate']) assert.equal(await page.locator(`#${id}`).isChecked(), false);
+    console.log(`PASS: ${language} çok adımlı çerez tercihleri kapatılıp kaydedildi.`);
+  }
   assert.equal(await page.locator('#unrelated-result').textContent(), 'Bu düğmeye henüz tıklanmadı.');
-  console.log('PASS: tercih menüsüne, kabul et ve ilgisiz düğmelere dokunulmadı.');
+  console.log('PASS: tercihler açıldı; isteğe bağlı izinler kapatıldı, zorunlu çerezler korundu.');
+
+  await page.click('#stacked');
+  await page.waitForFunction(() => document.querySelector('#notification-result').dataset.choice === 'dismissed'
+    && document.querySelector('#result').dataset.choice === 'rejected');
+  assert.equal(await page.locator('#notification-prompt').isVisible(), false);
+  console.log('PASS: üst üste gelen bildirim ve çok adımlı çerez ekranı işlendi.');
 
   await popup.bringToFront();
   await popup.locator('#enabled').uncheck();
@@ -96,6 +110,15 @@ try {
   await frame.locator('#show').click();
   await frame.locator('#result[data-choice="rejected"]').waitFor();
   console.log('PASS: farklı origin içindeki iframe penceresi reddedildi.');
+
+  await page.evaluate(url => {
+    const frame = document.createElement('iframe');
+    frame.src = url;
+    frame.id = 'notification-frame';
+    document.body.append(frame);
+  }, `${second.url}/notification`);
+  await page.frameLocator('#notification-frame').locator('body[data-choice="dismissed"]').waitFor();
+  console.log('PASS: Netmera biçimindeki div düğmesi, farklı origin çerçevesinde ertelendi.');
 
   await page.reload();
   await page.click('#show');

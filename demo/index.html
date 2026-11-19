@@ -20,6 +20,14 @@
     .cookie-banner { position: fixed; bottom: 24px; right: 24px; width: min(420px, calc(100% - 48px)); background: white; border: 1px solid #d7dfd1; border-radius: 20px; padding: 26px; box-shadow: 0 15px 70px #183c3624; }
     .cookie-banner h2 { margin: 0; font-size: 22px; }
     .cookie-banner .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .cookie-banner { max-height: calc(100vh - 48px); overflow: auto; z-index: 2; }
+    .notification-prompt { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); width: min(480px, calc(100% - 48px)); z-index: 3; background: white; border: 1px solid #d7dfd1; border-radius: 16px; padding: 24px; box-shadow: 0 15px 70px #183c3624; }
+    .notification-prompt h2 { margin: 0; font-size: 21px; }
+    .notification-prompt .actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .consent-option { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 0; border-bottom: 1px solid #e3e8df; font-size: 14px; }
+    .consent-option input { accent-color: #285b41; height: 20px; width: 20px; flex-shrink: 0; }
+    .save { margin-top: 20px; }
+    #notification-result { font-size: 13px; }
     .negative { margin-top: 40px; border-top: 1px solid #d7dfd1; padding-top: 16px; }
     [hidden] { display: none !important; }
     #unrelated-result { font-size: 13px; }
@@ -43,9 +51,11 @@
     <select id="language" aria-label="Deneme dili"><option value="tr">Türkçe</option><option value="en">English</option><option value="de">Deutsch</option></select>
     <button id="show">Pencereyi göster</button>
     <button id="delayed" class="secondary">2 saniye sonra göster</button>
-    <button id="preferences" class="secondary">Yalnızca tercihler</button>
+    <button id="preferences" class="secondary">Seçenekleri yönet akışı</button>
+    <button id="stacked" class="secondary">İki pencereyi birlikte göster</button>
   </div>
   <p id="result" role="status">Bir deneme başlat. Sonuç burada görünecek.</p>
+  <p id="notification-result" role="status">Bildirim isteği henüz gösterilmedi.</p>
   <section class="negative">
     <h2>Yanlış tıklama kontrolü</h2>
     <p>Bu düğme bir çerez bildiriminin içinde değil. Eklenti buna dokunmamalı.</p>
@@ -53,13 +63,21 @@
     <p id="unrelated-result">Bu düğmeye henüz tıklanmadı.</p>
   </section>
   <div id="cookie-banner" class="cookie-banner" role="dialog" aria-labelledby="banner-title" hidden>
+    <div id="cookie-intro">
     <h2 id="banner-title"></h2>
     <p id="banner-text"></p>
     <div class="actions">
       <button id="accept" class="secondary"></button>
       <button id="reject"></button>
-      <button id="manage" class="secondary" hidden>Tercihleri yönet</button>
+      <button id="manage" class="secondary" hidden>Seçenekleri yönetin</button>
     </div>
+    </div>
+    <div id="cookie-settings" hidden></div>
+  </div>
+  <div id="notification-prompt" class="notification-prompt" role="dialog" aria-labelledby="notification-title" hidden>
+    <h2 id="notification-title">Gelişmelerden haberin olsun.</h2>
+    <p>En güncel haberler için bildirimlere izin ver.</p>
+    <div class="actions"><button id="notification-later" class="secondary">Daha Sonra</button><button id="notification-allow">İzin Ver</button></div>
   </div>
   <script>
     const translations = {
@@ -69,9 +87,20 @@
     };
     const banner = document.querySelector('#cookie-banner');
     const result = document.querySelector('#result');
+    const notification = document.querySelector('#notification-prompt');
+    const notificationResult = document.querySelector('#notification-result');
+    const preferences = {
+      tr: ['Çerez seçenekleri', 'Zorunlu çerezler', 'Reklam ve pazarlama', 'Analitik çerezler', 'Meşru menfaat', 'Seçimleri onayla', 'Seçenekleri yönetin'],
+      en: ['Cookie settings', 'Necessary cookies', 'Advertising and marketing', 'Analytics cookies', 'Legitimate interest', 'Save preferences', 'Manage options'],
+      de: ['Cookie-Einstellungen', 'Notwendige Cookies', 'Marketing', 'Statistik Cookies', 'Berechtigtes Interesse', 'Auswahl bestätigen', 'Optionen verwalten'],
+    };
     let pending;
     function show(preferencesOnly = false) {
       clearTimeout(pending);
+      notification.hidden = true;
+      document.querySelector('#cookie-intro').hidden = false;
+      document.querySelector('#cookie-settings').hidden = true;
+      document.querySelector('#cookie-settings').replaceChildren();
       const text = translations[document.querySelector('#language').value];
       document.querySelector('#banner-title').textContent = text[0];
       document.querySelector('#banner-text').textContent = text[1];
@@ -87,10 +116,36 @@
         result.textContent = 'Reddedildi: bu denemede isteğe bağlı çerezler kabul edilmedi.';
         result.dataset.choice = 'rejected';
       });
-      document.querySelector('#manage').hidden = !preferencesOnly;
+      const oldManage = document.querySelector('#manage');
+      const newManage = oldManage.cloneNode(true);
+      oldManage.replaceWith(newManage);
+      const settingsText = preferences[document.querySelector('#language').value];
+      newManage.textContent = settingsText[6];
+      newManage.hidden = !preferencesOnly;
+      newManage.addEventListener('click', () => {
+        document.querySelector('#cookie-intro').hidden = true;
+        const settings = document.querySelector('#cookie-settings');
+        settings.innerHTML = `<h2>${settingsText[0]}</h2>
+          <label class="consent-option">${settingsText[1]}<input id="necessary" type="checkbox" checked disabled></label>
+          <label class="consent-option">${settingsText[2]}<input id="marketing" type="checkbox" checked></label>
+          <label class="consent-option">${settingsText[3]}<input id="analytics" type="checkbox" checked></label>
+          <label class="consent-option">${settingsText[4]}<input id="legitimate" type="checkbox" checked></label>
+          <button id="save" class="save">${settingsText[5]}</button>`;
+        settings.hidden = false;
+        result.textContent = 'Tercihler açıldı. Reklam, analitik ve meşru menfaat izinleri kapatılmayı bekliyor…';
+        result.dataset.stage = 'preferences';
+        document.querySelector('#save').addEventListener('click', () => {
+          const optional = ['marketing', 'analytics', 'legitimate'].some(id => document.getElementById(id).checked);
+          banner.hidden = true;
+          result.dataset.choice = optional ? 'accepted' : 'rejected';
+          result.textContent = optional ? 'Bazı isteğe bağlı izinler açık kaydedildi.' : 'Reddedildi: reklam, analitik ve meşru menfaat kapalı; zorunlu çerezler korundu.';
+          result.dataset.stage = 'saved';
+        });
+      });
       banner.hidden = false;
-      result.textContent = preferencesOnly ? 'Ret düğmesi yok. İlk sürüm bu pencereye dokunmamalı.' : 'Çerez penceresi açık. Ret işlemi bekleniyor…';
+      result.textContent = preferencesOnly ? 'Doğrudan ret düğmesi yok. Seçenekleri yönetme akışı bekleniyor…' : 'Çerez penceresi açık. Ret işlemi bekleniyor…';
       result.dataset.choice = 'pending';
+      result.dataset.stage = 'intro';
     }
     document.querySelector('#show').addEventListener('click', () => show());
     document.querySelector('#delayed').addEventListener('click', () => {
@@ -101,6 +156,25 @@
       pending = setTimeout(() => show(), 2000);
     });
     document.querySelector('#preferences').addEventListener('click', () => show(true));
+    document.querySelector('#stacked').addEventListener('click', () => {
+      show(true);
+      const previous = document.querySelector('#notification-later');
+      const fresh = previous.cloneNode(true);
+      previous.replaceWith(fresh);
+      fresh.addEventListener('click', () => {
+        notification.hidden = true;
+        notificationResult.textContent = 'Bildirim isteği ertelendi. Tarayıcıya bildirim izni verilmedi.';
+        notificationResult.dataset.choice = 'dismissed';
+      });
+      notification.hidden = false;
+      notificationResult.textContent = 'Bildirim izni isteği açık. Daha Sonra seçeneği bekleniyor…';
+      notificationResult.dataset.choice = 'pending';
+    });
+    document.querySelector('#notification-allow').addEventListener('click', () => {
+      notification.hidden = true;
+      notificationResult.textContent = 'İzin Ver seçildi. Eklenti buna otomatik tıklamamalı.';
+      notificationResult.dataset.choice = 'allowed';
+    });
     document.querySelector('#accept').addEventListener('click', () => {
       banner.hidden = true;
       result.textContent = 'Kabul edildi. Eklenti bu seçeneğe otomatik tıklamamalı.';

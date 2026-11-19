@@ -9,7 +9,7 @@ function render(enabled: boolean) {
   toggle.checked = enabled;
   status.textContent = enabled ? 'Koruma açık' : 'Duraklatıldı';
   description.textContent = enabled
-    ? 'Tanınan çerez pencerelerinde ret seçeneği otomatik uygulanır.'
+    ? 'Tanınan çerez izinleri kapatılır, bildirim istekleri ertelenir.'
     : 'Otomatik reddetme tüm sitelerde duraklatıldı.';
   document.body.dataset.enabled = String(enabled);
 }
