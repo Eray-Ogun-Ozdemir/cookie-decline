@@ -4,11 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cookie Decline · Demo playground</title>
+  <link rel="icon" type="image/png" href="/icon.png">
   <style>
     :root { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #183c36; background: #f6f7f2; }
     * { box-sizing: border-box; }
     body { max-width: 900px; margin: 70px auto; padding: 24px; }
     .eyebrow { font-size: 11px; letter-spacing: 2px; color: #63836a; }
+    .demo-brand { display: flex; align-items: center; gap: 12px; }
+    .demo-brand img { width: 36px; height: 36px; }
     h1 { font-size: clamp(32px, 5vw, 54px); letter-spacing: -2px; margin: 18px 0; }
     p { line-height: 1.7; color: #5a7062; }
     .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin: 28px 0; }
@@ -44,7 +47,7 @@
     <div><strong>Install-free preview</strong><p>The extension's consent rules run on this page only. Chrome permissions and the extension popup are tested separately.</p></div>
     <label><input id="preview-enabled" type="checkbox" role="switch" checked aria-label="Automatically handle consent in the preview"><span id="preview-status" aria-live="polite">On</span></label>
   </section>
-  <span class="eyebrow">COOKIE DECLINE / DEMO PLAYGROUND</span>
+  <div class="demo-brand"><img src="/icon.png" width="36" height="36" alt=""><span class="eyebrow">COOKIE DECLINE / DEMO PLAYGROUND</span></div>
   <h1>A little less clicking.<br>A little more browsing.</h1>
   <p id="intro">Load the extension in Chrome, choose a consent language, and show a banner.<br>With automation enabled, supported optional consent should be declined.</p>
   <div class="toolbar">

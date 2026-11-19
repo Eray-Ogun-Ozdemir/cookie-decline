@@ -1,3 +1,5 @@
+<img src="public/icons/icon-128.png" alt="Cookie Decline logo" width="96" height="96">
+
 # Cookie Decline
 
 **Say no to optional cookies. Keep browsing.**
@@ -148,6 +150,8 @@ Add explicit labels and contextual checks in `src/rules.ts`, `src/preferences.ts
 | `src/popup.ts`, `public/popup.*` | The extension popup. |
 | `src/preview.ts` | The install-free preview adapter. |
 | `public/manifest.json` | Chrome extension configuration. |
+| `public/icons/` | Transparent logo and Chrome icons in 16, 32, 48, and 128 pixels. |
+| `assets/branding/` | Logo source and export notes. |
 | `demo/index.html` | The interactive example page. |
 | `scripts/` | Build, local server, and browser testing tools. |
 | `tests/` | Automated behavior tests. |

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 
 const demo = await readFile(new URL('../demo/index.html', import.meta.url));
+const icon = await readFile(new URL('../public/icons/icon-128.png', import.meta.url));
 const previewMode = process.argv.includes('--preview');
 const port = previewMode ? 4174 : 4173;
 let previewCode;
@@ -18,6 +19,11 @@ if (previewMode) {
   previewCode = result.outputFiles[0].text;
 }
 const server = createServer((request, response) => {
+  if (request.url === '/icon.png') {
+    response.writeHead(200, { 'Content-Type': 'image/png' });
+    response.end(icon);
+    return;
+  }
   if (previewMode && request.url === '/preview.js') {
     response.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store' });
     response.end(previewCode);

@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
 const demo = await readFile(new URL('../demo/index.html', import.meta.url));
+const icon = await readFile(new URL('../public/icons/icon-128.png', import.meta.url));
 const pathToExtension = await realpath(new URL('../dist', import.meta.url));
 // Unpacked extensions without a manifest key derive their ID from their absolute path.
 const extensionId = createHash('sha256').update(pathToExtension).digest('hex').slice(0, 32)
@@ -19,6 +20,11 @@ const errors = [];
 
 async function serve() {
   const server = createServer((request, response) => {
+    if (request.url === '/icon.png') {
+      response.writeHead(200, { 'Content-Type': 'image/png' });
+      response.end(icon);
+      return;
+    }
     response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     response.end(request.url === '/notification' ? `<!doctype html><html lang="tr"><body>
       <div id="notification-dlg" class="notification-wrapper"><p>Haberler için bildirimlere izin ver</p>
@@ -48,6 +54,7 @@ try {
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
   await popup.waitForFunction(() => !document.querySelector('#enabled').disabled);
   assert.equal(await popup.locator('#enabled').isChecked(), true);
+  await popup.locator('.brand-mark').evaluate(image => image.decode());
   await popup.setViewportSize({ width: 360, height: 580 });
   await popup.locator('body').screenshot({ path: join(output, 'popup.png') });
 
