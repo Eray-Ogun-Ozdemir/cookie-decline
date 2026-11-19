@@ -1,6 +1,6 @@
 {
   "name": "cerez-reddet",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "Çerez bildirimlerindeki açık ret seçeneklerini uygulayan Chrome eklentisi.",
   "type": "module",

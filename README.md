@@ -66,6 +66,8 @@ Gerçek tarayıcıyla uçtan uca test için bir kez `npx playwright install chro
 
 TypeScript değişiklikleri `dev` ile derlenir. HTML, CSS veya manifest değiştiğinde `npm run build` çalıştır. Sonra `chrome://extensions` üzerinden eklentiyi yeniden yükle ve denediğin web sayfasını yenile. VS Code'da varsayılan derleme görevi de hazırdır.
 
+Eklenti yeniden yüklendiğinde açık sayfalardaki eski içerik betikleri çalışmayı bırakır. Güncel sürümün o sayfada devreye girmesi için web sayfasını da yenile. Chrome'un **Hatalar** ekranında önceki sürümden kayıtlar kalabilir; güncel sürümü ve sayfayı yükledikten sonra **Tümünü temizle** ile eski kayıtları temizleyebilirsin. Yeni bir hata oluşursa ayrıca incelenmelidir.
+
 ## Sürüm 0.2'nin kapsamı
 
 - Yalnızca tanınan tam düğme metinlerine tıklar: örneğin **Tümünü reddet**, **Reject all**, **Alle ablehnen**, **Yalnızca gerekli çerezler**.

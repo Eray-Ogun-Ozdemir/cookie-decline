@@ -125,6 +125,20 @@ try {
   await page.waitForFunction(() => document.querySelector('#result').dataset.choice === 'rejected');
   assert.deepEqual(errors, []);
   console.log('PASS: sayfa yenileme sonrası eklenti çalıştı; sayfa hatası yok.');
+
+  // Reload the extension while keeping the website open, then trigger its old
+  // observer. Old scripts must stop without touching removed storage APIs.
+  await popup.bringToFront();
+  await popup.evaluate(() => { setTimeout(() => chrome.runtime.reload(), 0); });
+  await page.bringToFront();
+  await page.waitForTimeout(700);
+  await page.click('#show');
+  await page.waitForTimeout(450);
+  assert.equal(await page.locator('#cookie-banner').isVisible(), true);
+  assert.deepEqual(errors, []);
+  // In this test Chromium, runtime.reload unloads command-line-loaded extensions.
+  // Check stale-script cleanup here; fresh injection is covered by the page reload above.
+  console.log('PASS: eklenti yeniden yüklenince açık sayfadaki eski betik hatasız durdu.');
   console.log('Tarayıcı kontrolleri geçti. Görseller: .test-output/popup.png ve .test-output/demo.png');
 } finally {
   await context?.close();

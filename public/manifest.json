@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Çerez Reddet",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Tanınan çerez tercihlerini reddeder, site içindeki bildirim isteklerini erteler. Türkçe, İngilizce ve Almanca.",
   "permissions": ["storage"],
   "action": {

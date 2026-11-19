@@ -9,20 +9,32 @@ before(async () => {
   contentCode = result.outputFiles[0].text;
 });
 
-function setup(markup = '', initialEnabled = true) {
+function setup(markup = '', initialEnabled = true, options: { readFails?: boolean; detachThrows?: boolean } = {}) {
   const dom = page(markup);
   const listeners = new Set<(changes: Record<string, { newValue: boolean }>, area: string) => void>();
   const runtime: { id?: string } = { id: 'extension-test' };
-  Object.defineProperty(dom.window, 'chrome', { value: {
+  const api = {
     runtime,
     storage: {
-      local: { get: async () => ({ enabled: initialEnabled }) },
+      local: { get: async () => {
+        if (options.readFails) throw new Error('Extension context invalidated.');
+        return { enabled: initialEnabled };
+      } },
       onChanged: {
         addListener: (listener: typeof listeners extends Set<infer T> ? T : never) => listeners.add(listener),
-        removeListener: (listener: typeof listeners extends Set<infer T> ? T : never) => listeners.delete(listener),
+        removeListener: (listener: typeof listeners extends Set<infer T> ? T : never) => {
+          if (options.detachThrows) throw new Error('Extension context invalidated.');
+          listeners.delete(listener);
+        },
       },
     },
-  } });
+  };
+  Object.defineProperty(dom.window, 'chrome', { value: api });
+  const errors: string[] = [];
+  dom.window.addEventListener('error', event => {
+    errors.push(event.message);
+    event.preventDefault();
+  });
   let rejects = 0;
   let accepts = 0;
   dom.window.document.addEventListener('click', event => {
@@ -32,7 +44,9 @@ function setup(markup = '', initialEnabled = true) {
   });
   dom.window.eval(contentCode);
   return {
-    dom, runtime,
+    dom, runtime, errors,
+    removeStorage() { Reflect.deleteProperty(api, 'storage'); },
+    get listenerCount() { return listeners.size; },
     get rejects() { return rejects; },
     get accepts() { return accepts; },
     setEnabled(value: boolean) { for (const listener of listeners) listener({ enabled: { newValue: value } }, 'local'); },
@@ -95,4 +109,52 @@ test('eklenti yeniden yüklendiğinde eski içerik betiği tıklamayı bırakır
     await delay();
     assert.equal(state.rejects, 0);
   } finally { state.dom.window.close(); }
+});
+
+test('yeniden yüklemede storage kaybolursa hata vermeden durur', async () => {
+  const state = setup(banner());
+  try {
+    await delay(20);
+    state.runtime.id = undefined;
+    state.removeStorage();
+    await delay();
+    assert.deepEqual(state.errors, []);
+    assert.equal(state.rejects, 0);
+    assert.equal(state.listenerCount, 0);
+    state.dom.window.document.body.innerHTML = banner();
+    await delay();
+    assert.equal(state.rejects, 0);
+  } finally { state.dom.window.close(); }
+});
+
+test('Chrome olay dinleyicisi kaldırılırken bağlam geçersizleşse de temizliği tamamlar', async () => {
+  const state = setup(banner(), true, { detachThrows: true });
+  try {
+    await delay(20);
+    state.runtime.id = undefined;
+    await delay();
+    assert.deepEqual(state.errors, []);
+    assert.equal(state.rejects, 0);
+  } finally { state.dom.window.close(); }
+});
+
+test('storage okunamazsa otomatik tıklamayı başlatmaz', async () => {
+  const state = setup(banner(), true, { readFails: true });
+  try {
+    await delay();
+    assert.deepEqual(state.errors, []);
+    assert.equal(state.rejects, 0);
+    assert.equal(state.listenerCount, 0);
+  } finally { state.dom.window.close(); }
+});
+
+test('Chrome eklenti API’leri olmayan ortamda hata üretmez ve tıklamaz', async () => {
+  const dom = page(banner());
+  try {
+    let clicks = 0;
+    dom.window.document.addEventListener('click', () => clicks++);
+    assert.doesNotThrow(() => dom.window.eval(contentCode));
+    await delay();
+    assert.equal(clicks, 0);
+  } finally { dom.window.close(); }
 });
