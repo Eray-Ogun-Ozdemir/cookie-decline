@@ -7,10 +7,10 @@ const error = document.querySelector<HTMLElement>('#error')!;
 
 function render(enabled: boolean) {
   toggle.checked = enabled;
-  status.textContent = enabled ? 'Koruma açık' : 'Duraklatıldı';
+  status.textContent = enabled ? 'Auto-decline on' : 'Paused';
   description.textContent = enabled
-    ? 'Tanınan çerez izinleri kapatılır, bildirim istekleri ertelenir.'
-    : 'Otomatik reddetme tüm sitelerde duraklatıldı.';
+    ? 'Recognized optional consent is declined and notification prompts are dismissed.'
+    : 'Automatic consent handling is paused on all sites.';
   document.body.dataset.enabled = String(enabled);
 }
 
@@ -20,7 +20,7 @@ async function initialize() {
     render(settings.enabled !== false);
     toggle.disabled = false;
   } catch {
-    error.textContent = 'Ayar okunamadı. Eklenti menüsünü yeniden açmayı deneyin.';
+    error.textContent = 'Unable to read your preferences. Try reopening the extension popup.';
   }
 }
 
@@ -33,7 +33,7 @@ toggle.addEventListener('change', async () => {
     render(value);
   } catch {
     render(!value);
-    error.textContent = 'Ayar kaydedilemedi. Yeniden deneyin.';
+    error.textContent = 'Unable to save your preference. Please try again.';
   } finally {
     toggle.disabled = false;
   }

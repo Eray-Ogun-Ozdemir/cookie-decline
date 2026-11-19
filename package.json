@@ -1,8 +1,8 @@
 {
-  "name": "cerez-reddet",
+  "name": "cookie-decline",
   "version": "0.2.1",
   "private": true,
-  "description": "Çerez bildirimlerindeki açık ret seçeneklerini uygulayan Chrome eklentisi.",
+  "description": "A Chrome extension that declines supported cookie consent requests and dismisses website notification prompts.",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",

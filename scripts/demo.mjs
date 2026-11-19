@@ -24,7 +24,7 @@ const server = createServer((request, response) => {
     return;
   }
   if (request.url !== '/' && request.url !== '/index.html') {
-    response.writeHead(404).end('Bulunamadı');
+    response.writeHead(404).end('Not found');
     return;
   }
   response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
@@ -33,4 +33,4 @@ const server = createServer((request, response) => {
     : demo);
 });
 server.on('error', error => { console.error(error.message); process.exitCode = 1; });
-server.listen(port, '127.0.0.1', () => console.log(`${previewMode ? 'Kurulumsuz önizleme' : 'Eklenti test sayfası'}: http://127.0.0.1:${port} — kapatmak için Ctrl+C`));
+server.listen(port, '127.0.0.1', () => console.log(`${previewMode ? 'Cookie Decline preview' : 'Cookie Decline extension demo'}: http://127.0.0.1:${port} — press Ctrl+C to stop`));

@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Çerez Reddet",
+  "name": "Cookie Decline",
   "version": "0.2.1",
-  "description": "Tanınan çerez tercihlerini reddeder, site içindeki bildirim isteklerini erteler. Türkçe, İngilizce ve Almanca.",
+  "description": "Declines supported cookie consent requests and dismisses website notification prompts. Supports English, German, and Turkish.",
   "permissions": ["storage"],
   "action": {
-    "default_title": "Çerez Reddet",
+    "default_title": "Cookie Decline",
     "default_popup": "popup.html"
   },
   "content_scripts": [

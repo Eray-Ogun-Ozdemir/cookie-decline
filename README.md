@@ -1,102 +1,160 @@
-# Çerez Reddet
+# Cookie Decline
 
-Türkçe, İngilizce ve Almanca çerez bildirimlerini ve tanınan site içi bildirim izni isteklerini yöneten Chrome eklentisi. TypeScript, HTML ve CSS ile yazılır; Manifest V3 kullanır.
+**Say no to optional cookies. Keep browsing.**
 
-## VS Code ile başlangıç
+Cookie Decline is a Chrome extension that declines supported cookie consent requests, turns off recognized optional consent settings, and dismisses supported website notification prompts. It runs locally in your browser using TypeScript, HTML, CSS, and Manifest V3.
 
-1. VS Code → **File / Open Folder** ile bu proje klasörünü aç.
-2. **Terminal / New Terminal** menüsünden terminal aç.
-3. Aşağıdaki komutları çalıştır (Node.js 20 veya üzeri gerekir):
+The interface is in English. Consent detection supports **English, German, and Turkish**.
+
+## Features
+
+- Clicks recognized rejection options such as **Reject all**, **Alle ablehnen**, and **Tümünü reddet** within a cookie consent interface.
+- Opens supported **Manage options** screens, switches off recognized optional consent and legitimate-interest settings, and saves the selection while preserving necessary cookies.
+- Supports Google Funding Choices consent controls, including controls operated through their visible labels.
+- Dismisses supported website notification prompts using **Not now**, **Jetzt nicht**, or **Daha Sonra**, including Netmera's custom control inside a matching frame.
+- Detects consent interfaces that appear after the initial page load and runs in matching HTTP/HTTPS frames.
+- Includes a global on/off switch, an install-free preview, and automated browser tests.
+
+## Get started
+
+Requirements: **Node.js 20 or later**, npm, and Chrome to run the extension. Any modern browser can open the install-free preview.
+
+Open this project folder in VS Code, then open **Terminal → New Terminal**:
 
 ```sh
-npm install
+npm ci
 npm run check
 ```
 
-Bu çalışma alanında bağımlılıklar önceden yüklendiyse yalnızca `npm run check` yeterlidir. Tekrarlanabilir temiz kurulum için `npm ci` kullan.
+`npm ci` installs the dependencies pinned in the lockfile. `npm run check` runs type checking, automated tests, and the production build.
 
-## Chrome'a yüklemeden önizleme
+## Preview without installing
 
 ```sh
 npm run preview
 ```
 
-**http://127.0.0.1:4174** adresini istediğin tarayıcıda aç. Bu mod, eklentiyle aynı ret kurallarını yalnızca örnek sayfada çalıştırır; eklenti kurmak gerekmez. Üstteki anahtarla otomatik işlemleri durdurup açabilirsin. Üç dili, gecikmeli pencereyi, çok adımlı tercihleri ve üst üste gelen iki izin isteğini burada deneyebilirsin.
+Open **http://127.0.0.1:4174** in your browser. The preview runs the same consent rules on the example page without installing an extension.
 
-Önizleme Chrome'un eklenti izinlerini ve eklenti menüsünü sınamaz; bunlar ayrı tarayıcı testiyle veya Chrome'a yükleyerek kontrol edilir. `npm run demo` ise gerçek eklenti için kullanılan, kendi kendine reddetme yapmayan sayfadır.
+Use the language selector and try:
 
-## Chrome'a yükleme
+- **Show cookie banner** for a direct rejection.
+- **Show after 2 seconds** for a delayed prompt.
+- **Manage options flow** for a consent settings screen.
+- **Show both prompts** for a notification request and cookie consent prompt together.
+- The on/off switch to pause and resume automation.
 
-1. Chrome adres çubuğuna `chrome://extensions` yaz.
-2. **Geliştirici modu / Developer mode** seçeneğini aç.
-3. **Paketlenmemiş öğe yükle / Load unpacked** düğmesine bas.
-4. Bu projenin içindeki **dist** klasörünü seç.
-5. Eklentiyi araç çubuğuna sabitle. Açık web sayfalarını bir kez yenile.
+The preview only affects its own example page. Chrome permissions, the extension popup, and behavior on other websites require the extension or the browser test suite.
 
-Eklenti varsayılan olarak açıktır. Menüsündeki anahtar, tüm sitelerde otomatik reddetmeyi açıp kapatır; açık sayfalara da uygulanır.
+## Install in Chrome
 
-## Kendi deneme sayfamız
+1. Run `npm run build` to generate the `dist` folder.
+2. Open `chrome://extensions` in Chrome.
+3. Enable **Developer mode**.
+4. Click **Load unpacked** and select this project's **dist** folder.
+5. Pin **Cookie Decline** to the toolbar and reload any websites that were already open.
+
+The extension is enabled by default. The popup switch pauses or resumes automation across all sites, including open pages with an active content script.
+
+## Test the installed extension
 
 ```sh
 npm run demo
 ```
 
-Chrome'da **http://127.0.0.1:4173** adresini aç.
+Open **http://127.0.0.1:4173** in Chrome. Unlike the install-free preview, this page relies on the installed extension to perform automatic actions.
 
-- Her dil için **Pencereyi göster** düğmesine bas; sonuç **Reddedildi** olmalı.
-- **2 saniye sonra göster** ile sonradan ekrana gelen pencereyi dene.
-- Eklentiyi kapatıp pencereyi göster; pencere açık kalmalı. Tekrar açınca reddedilmeli.
-- **Seçenekleri yönet akışı** ile reklam, analitik ve meşru menfaat anahtarları kapatılıp seçimler kaydedilmeli; zorunlu çerezler açık kalmalı.
-- **İki pencereyi birlikte göster** ile bildirim isteğinde **Daha Sonra** seçilmeli, çerez tercihleri ayrıca reddedilmeli.
-- Çerez penceresi dışındaki **Reject all** düğmesine otomatik tıklanmamalı.
+- Test direct rejection in all three languages. The result should say **Declined**.
+- Test a delayed banner.
+- Pause the extension and show a banner: it should remain open. Resume automation: it should be declined.
+- Run **Manage options flow**: advertising, analytics, and legitimate-interest settings should be off when saved; necessary cookies should remain enabled.
+- Run **Show both prompts**: the notification request should be dismissed, and optional cookie settings should be declined.
+- Verify that the unrelated **Reject all** button outside the consent interface is never clicked automatically.
 
-Sayfa yalnızca deneme içindir; gerçek çerez veya takip isteği oluşturmaz. Gerçek sitelerde mevcut çerez tercihi varsa pencere yeniden çıkmayabilir. İlk denemede kendi örnek sayfamızı kullan.
+The example page does not create real cookies, request native notification permission, or send tracking requests. Real websites may remember previous consent choices and stop displaying their consent interface.
 
-## Geliştirme
+## Development
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Watch and rebuild TypeScript changes. |
+| `npm run typecheck` | Check TypeScript types. |
+| `npm test` | Run consent rules and lifecycle tests. |
+| `npm run build` | Build the extension into `dist`. |
+| `npm run check` | Run type checking, tests, and the build. |
+| `npm run preview` | Start the install-free preview on port 4174. |
+| `npm run demo` | Start the installed-extension demo on port 4173. |
+| `npm run test:browser` | Test the extension in a separate Chromium profile. |
+
+After changing HTML, CSS, or the manifest, run `npm run build`. Then reload the extension at `chrome://extensions` and refresh the website being tested. The TypeScript watcher does not automatically copy changes from `public`.
+
+VS Code build, check, demo, and preview tasks are also available.
+
+### Browser tests
+
+Install the test browser once:
 
 ```sh
-npm run dev        # TypeScript değişikliklerini izler
-npm run typecheck  # Tip kontrolü
-npm test           # Ret kuralları ve çalışma davranışı testleri
-npm run build      # Chrome'a yüklenecek dist klasörünü üretir
-npm run check      # Tip kontrolü + test + derleme
+npx playwright install chromium --no-shell
 ```
 
-Gerçek tarayıcıyla uçtan uca test için bir kez `npx playwright install chromium --no-shell` çalıştır, ardından `npm run test:browser` kullan. Bu kontrol eklentiyi ayrı ve geçici bir tarayıcı profiline yükler; kendi Chrome profiline dokunmaz. Üç dili, geç açılan pencereleri, aç/kapat ayarını, ilgisiz düğmeleri ve farklı origin içindeki iframe'i sınar. Görseller `.test-output` klasörüne yazılır. Playwright'ın [Chrome eklentisi test rehberi](https://playwright.dev/docs/chrome-extensions) temel alınmıştır.
+Then run:
 
-TypeScript değişiklikleri `dev` ile derlenir. HTML, CSS veya manifest değiştiğinde `npm run build` çalıştır. Sonra `chrome://extensions` üzerinden eklentiyi yeniden yükle ve denediğin web sayfasını yenile. VS Code'da varsayılan derleme görevi de hazırdır.
+```sh
+npm run test:browser
+```
 
-Eklenti yeniden yüklendiğinde açık sayfalardaki eski içerik betikleri çalışmayı bırakır. Güncel sürümün o sayfada devreye girmesi için web sayfasını da yenile. Chrome'un **Hatalar** ekranında önceki sürümden kayıtlar kalabilir; güncel sürümü ve sayfayı yükledikten sonra **Tümünü temizle** ile eski kayıtları temizleyebilirsin. Yeni bir hata oluşursa ayrıca incelenmelidir.
+The suite loads the extension into a separate temporary Chromium profile. It checks all three consent languages, multi-step preferences, stacked prompts, delayed banners, the popup switch, matching frames, unrelated controls, and stale-script cleanup after an extension reload. Screenshots are written to `.test-output`.
 
-## Sürüm 0.2'nin kapsamı
+The setup follows Playwright's [Chrome extension testing guide](https://playwright.dev/docs/chrome-extensions).
 
-- Yalnızca tanınan tam düğme metinlerine tıklar: örneğin **Tümünü reddet**, **Reject all**, **Alle ablehnen**, **Yalnızca gerekli çerezler**.
-- Tıklamak için bir çerez bildirimi bağlamı arar; kabul et, genel kapat ve belirsiz düğmelere tıklamaz.
-- Doğrudan ret yoksa tanınan **Seçenekleri yönetin / Manage options / Optionen verwalten** düğmesini açar. Yalnızca anlamını tanıdığı izin anahtarlarını kapatır; zorunlu çerezlere dokunmaz. Görünür denetimlerin anlamı ve durumu biliniyorsa seçimleri kaydeder; belirsiz veya kapatılamayan bir denetim varsa kaydetmez.
-- Google Funding Choices ekranındaki izin ve meşru menfaat denetimleri desteklenir. Görünmez HTML kutularının görünür etiketleri üzerinden işlem yapılır. Ters anlamlı itiraz/opt-out kutularına otomatik müdahale edilmez.
-- Site içindeki bildirim izni pencerelerinde **Daha Sonra / Not now / Jetzt nicht** gibi seçenekler tanınır. Netmera'nın çerçeve içindeki özel düğmesi de desteklenir. Bu işlem site isteğini erteler; kalıcı bildirim engeli oluşturmaz ve tarayıcının kendi izin penceresine müdahale etmez.
-- Gizli veya devre dışı düğmelere tıklamaz. Aynı düğmeyi tekrar tekrar tıklamaz.
-- Sonradan eklenen/değişen pencereleri izler; eşleşen HTTP/HTTPS iframe belgelerinde de çalışır.
-- Pencereyi kendisi silmez veya gizlemez; sitenin kendi ret düğmesini çalıştırır. Bu, sitenin ret kararına uyduğunu ya da ağdaki tüm takibin engellendiğini doğrulamaz.
-- Tüm tercih menüleri ve Shadow DOM desteklenmez. Birçok site farklı metinler veya özel arayüzler kullanır; bunlar için ayrıca doğrulanmış kurallar gerekir. Açılan bir tercih akışı 30 saniye/100 adım sınırında durur.
-- Daha önce kaydedilmiş çerezleri silmez, ağ isteklerini engellemez ve zorunlu çerezleri kaldırmaz.
+### Reloading and troubleshooting
 
-## İzinler ve veriler
+Reloading an extension invalidates its old content scripts on open pages. Refresh those pages to activate the current version. Version 0.2.1 handles invalidated or missing extension APIs by stopping the old script safely.
 
-`storage` izni sadece aç/kapat ayarını cihazında saklar. İçerik betiği HTTP/HTTPS sayfalarında çerez arayüzünü bulmak için çalışır; Chrome bu yüzden sitelerdeki verilere erişim uyarısı gösterir. Chrome'un kendi sayfaları ve uzantı çalıştırmayı engellediği sayfalar desteklenmez.
+Chrome's **Errors** screen may retain entries from an earlier build. After rebuilding, reloading the extension, and refreshing the website, use **Clear all** to remove old entries. Investigate any errors that appear again.
 
-Sunucu, hesap, yapay zekâ API'si, telemetri veya dışarıya veri gönderme yoktur. Tarama geçmişi ya da sayfa içeriği kaydedilmez.
+### Adding support for another consent interface
 
-## Dosyalar
+Add explicit labels and contextual checks in `src/rules.ts`, `src/preferences.ts`, or `src/notifications.ts`. Add tests for both the intended action and similar-looking unrelated controls. Avoid generic text matching that could click buttons outside a consent interface.
 
-- `src/rules.ts`: Düğme metinleri, görünürlük ve çerez bağlamı.
-- `src/runner.ts`: Etkinlik kontrolü ve tek tıklama davranışı.
-- `src/preferences.ts`: Çok adımlı tercih yönetimi ve izin denetimleri.
-- `src/notifications.ts`: Site içi bildirim isteğini erteleme kuralları.
-- `src/content.ts`: Sayfa izleme ve ayar değişiklikleri.
-- `src/popup.ts`, `public/popup.*`: Eklenti menüsü.
-- `public/manifest.json`: Chrome yapılandırması.
-- `demo/index.html`: Elle deneme sayfası.
-- `tests/`: Otomatik davranış testleri.
+## Privacy and permissions
 
-Chrome başvuru belgeleri: [İçerik betikleri](https://developer.chrome.com/docs/extensions/develop/concepts/content-scripts), [ayar saklama](https://developer.chrome.com/docs/extensions/reference/api/storage), [yerel yükleme](https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world).
+- The `storage` permission stores the global on/off preference on your device.
+- Content scripts run on HTTP/HTTPS pages to inspect consent interfaces and operate supported controls. Chrome may describe this as access to website data.
+- The extension has no backend, account requirement, AI API integration, telemetry, or outbound data reporting.
+- Browsing history and page content are not recorded or sent to a server by the extension.
+
+## Current limitations
+
+- Website coverage is limited to recognized labels, contexts, and controls. Shadow DOM and arbitrary consent interfaces are not supported.
+- Preference flows stop when a control's meaning or state is unknown, an optional setting cannot be disabled, or the flow exceeds 30 seconds or 100 actions.
+- Necessary cookies are preserved. Reversed opt-out or objection checkboxes are not changed automatically.
+- Each action is attempted once per element to prevent repeated clicking. Some websites reuse existing controls when reopening a consent interface.
+- Notification dismissal postpones a website's request. It does not permanently block notifications or operate Chrome's native permission dialogs.
+- The extension uses the website's own controls. It does not independently verify that the site honors the recorded choice or stops all tracking.
+- It does not delete existing cookies or block network requests.
+- Chrome's internal pages and other pages where extensions are restricted are not supported.
+
+## Project structure
+
+| Path | Purpose |
+| --- | --- |
+| `src/rules.ts` | Rejection labels, visibility checks, and consent context detection. |
+| `src/runner.ts` | Action ordering, workflow state, and repeat-click prevention. |
+| `src/preferences.ts` | Multi-step consent settings and safe selection saving. |
+| `src/notifications.ts` | Website notification prompt dismissal. |
+| `src/content.ts` | Page observation, settings updates, and extension lifecycle handling. |
+| `src/popup.ts`, `public/popup.*` | The extension popup. |
+| `src/preview.ts` | The install-free preview adapter. |
+| `public/manifest.json` | Chrome extension configuration. |
+| `demo/index.html` | The interactive example page. |
+| `scripts/` | Build, local server, and browser testing tools. |
+| `tests/` | Automated behavior tests. |
+
+## References
+
+- [Chrome content scripts](https://developer.chrome.com/docs/extensions/develop/concepts/content-scripts)
+- [Chrome storage API](https://developer.chrome.com/docs/extensions/reference/api/storage)
+- [Load an unpacked extension](https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world)
+- [Debug Chrome extensions](https://developer.chrome.com/docs/extensions/get-started/tutorial/debug)

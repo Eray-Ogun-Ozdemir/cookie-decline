@@ -1,8 +1,9 @@
 {
   "version": "2.0.0",
   "tasks": [
-    { "label": "Eklentiyi derle", "type": "npm", "script": "build", "group": { "kind": "build", "isDefault": true }, "problemMatcher": [] },
-    { "label": "Kontrolleri çalıştır", "type": "npm", "script": "check", "group": "test", "problemMatcher": [] },
-    { "label": "Deneme sayfasını aç", "type": "npm", "script": "demo", "problemMatcher": [] }
+    { "label": "Build extension", "type": "npm", "script": "build", "group": { "kind": "build", "isDefault": true }, "problemMatcher": [] },
+    { "label": "Run checks", "type": "npm", "script": "check", "group": "test", "problemMatcher": [] },
+    { "label": "Start extension demo", "type": "npm", "script": "demo", "problemMatcher": [] },
+    { "label": "Start install-free preview", "type": "npm", "script": "preview", "problemMatcher": [] }
   ]
 }

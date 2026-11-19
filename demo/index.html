@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Çerez Reddet · Deneme alanı</title>
+  <title>Cookie Decline · Demo playground</title>
   <style>
     :root { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #183c36; background: #f6f7f2; }
     * { box-sizing: border-box; }
@@ -40,27 +40,27 @@
   </style>
 </head>
 <body>
-  <section id="preview-controls" class="preview-controls" aria-label="Önizleme kontrolleri" hidden>
-    <div><strong>Kurulumsuz önizleme</strong><p>Bu sayfada eklentiyle aynı ret kuralları çalışır. Diğer siteleri etkilemez; Chrome izinleri ve eklenti menüsü burada sınanmaz.</p></div>
-    <label><input id="preview-enabled" type="checkbox" role="switch" checked aria-label="Önizlemede otomatik reddetme"><span id="preview-status" aria-live="polite">Açık</span></label>
+  <section id="preview-controls" class="preview-controls" aria-label="Preview controls" hidden>
+    <div><strong>Install-free preview</strong><p>The extension's consent rules run on this page only. Chrome permissions and the extension popup are tested separately.</p></div>
+    <label><input id="preview-enabled" type="checkbox" role="switch" checked aria-label="Automatically handle consent in the preview"><span id="preview-status" aria-live="polite">On</span></label>
   </section>
-  <span class="eyebrow">ÇEREZ REDDET / DENEME ALANI</span>
-  <h1>Küçük bir pencere.<br>Daha az uğraş.</h1>
-  <p id="intro">Önce eklentiyi Chrome'a yükle. Bir dil seçip çerez penceresini aç.<br>Eklenti açıkken reddetme seçeneği otomatik uygulanmalı.</p>
+  <span class="eyebrow">COOKIE DECLINE / DEMO PLAYGROUND</span>
+  <h1>A little less clicking.<br>A little more browsing.</h1>
+  <p id="intro">Load the extension in Chrome, choose a consent language, and show a banner.<br>With automation enabled, supported optional consent should be declined.</p>
   <div class="toolbar">
-    <select id="language" aria-label="Deneme dili"><option value="tr">Türkçe</option><option value="en">English</option><option value="de">Deutsch</option></select>
-    <button id="show">Pencereyi göster</button>
-    <button id="delayed" class="secondary">2 saniye sonra göster</button>
-    <button id="preferences" class="secondary">Seçenekleri yönet akışı</button>
-    <button id="stacked" class="secondary">İki pencereyi birlikte göster</button>
+    <select id="language" aria-label="Consent language"><option value="en">English</option><option value="de">Deutsch</option><option value="tr">Türkçe</option></select>
+    <button id="show">Show cookie banner</button>
+    <button id="delayed" class="secondary">Show after 2 seconds</button>
+    <button id="preferences" class="secondary">Manage options flow</button>
+    <button id="stacked" class="secondary">Show both prompts</button>
   </div>
-  <p id="result" role="status">Bir deneme başlat. Sonuç burada görünecek.</p>
-  <p id="notification-result" role="status">Bildirim isteği henüz gösterilmedi.</p>
+  <p id="result" role="status">Start a demo. The result will appear here.</p>
+  <p id="notification-result" role="status">No notification request has been shown.</p>
   <section class="negative">
-    <h2>Yanlış tıklama kontrolü</h2>
-    <p>Bu düğme bir çerez bildiriminin içinde değil. Eklenti buna dokunmamalı.</p>
+    <h2>Unrelated button check</h2>
+    <p>This button is outside a cookie consent interface. The extension should leave it alone.</p>
     <button id="unrelated" class="secondary">Reject all</button>
-    <p id="unrelated-result">Bu düğmeye henüz tıklanmadı.</p>
+    <p id="unrelated-result">This button has not been clicked.</p>
   </section>
   <div id="cookie-banner" class="cookie-banner" role="dialog" aria-labelledby="banner-title" hidden>
     <div id="cookie-intro">
@@ -69,15 +69,15 @@
     <div class="actions">
       <button id="accept" class="secondary"></button>
       <button id="reject"></button>
-      <button id="manage" class="secondary" hidden>Seçenekleri yönetin</button>
+      <button id="manage" class="secondary" hidden>Manage options</button>
     </div>
     </div>
     <div id="cookie-settings" hidden></div>
   </div>
   <div id="notification-prompt" class="notification-prompt" role="dialog" aria-labelledby="notification-title" hidden>
-    <h2 id="notification-title">Gelişmelerden haberin olsun.</h2>
-    <p>En güncel haberler için bildirimlere izin ver.</p>
-    <div class="actions"><button id="notification-later" class="secondary">Daha Sonra</button><button id="notification-allow">İzin Ver</button></div>
+    <h2 id="notification-title">Stay in the loop.</h2>
+    <p id="notification-text">Allow notifications to receive the latest updates.</p>
+    <div class="actions"><button id="notification-later" class="secondary">Not now</button><button id="notification-allow">Allow notifications</button></div>
   </div>
   <script>
     const translations = {
@@ -89,6 +89,11 @@
     const result = document.querySelector('#result');
     const notification = document.querySelector('#notification-prompt');
     const notificationResult = document.querySelector('#notification-result');
+    const notificationTranslations = {
+      en: ['Stay in the loop.', 'Allow notifications to receive the latest updates.', 'Not now', 'Allow notifications'],
+      de: ['Bleib auf dem Laufenden.', 'Erlaube Benachrichtigungen für die neuesten Updates.', 'Jetzt nicht', 'Zulassen'],
+      tr: ['Gelişmelerden haberin olsun.', 'En güncel haberler için bildirimlere izin ver.', 'Daha Sonra', 'İzin Ver'],
+    };
     const preferences = {
       tr: ['Çerez seçenekleri', 'Zorunlu çerezler', 'Reklam ve pazarlama', 'Analitik çerezler', 'Meşru menfaat', 'Seçimleri onayla', 'Seçenekleri yönetin'],
       en: ['Cookie settings', 'Necessary cookies', 'Advertising and marketing', 'Analytics cookies', 'Legitimate interest', 'Save preferences', 'Manage options'],
@@ -113,7 +118,7 @@
       newReject.hidden = preferencesOnly;
       newReject.addEventListener('click', () => {
         banner.hidden = true;
-        result.textContent = 'Reddedildi: bu denemede isteğe bağlı çerezler kabul edilmedi.';
+        result.textContent = 'Declined: optional cookies were not accepted in this demo.';
         result.dataset.choice = 'rejected';
       });
       const oldManage = document.querySelector('#manage');
@@ -132,18 +137,18 @@
           <label class="consent-option">${settingsText[4]}<input id="legitimate" type="checkbox" checked></label>
           <button id="save" class="save">${settingsText[5]}</button>`;
         settings.hidden = false;
-        result.textContent = 'Tercihler açıldı. Reklam, analitik ve meşru menfaat izinleri kapatılmayı bekliyor…';
+        result.textContent = 'Preferences opened. Advertising, analytics, and legitimate-interest settings are waiting to be turned off…';
         result.dataset.stage = 'preferences';
         document.querySelector('#save').addEventListener('click', () => {
           const optional = ['marketing', 'analytics', 'legitimate'].some(id => document.getElementById(id).checked);
           banner.hidden = true;
           result.dataset.choice = optional ? 'accepted' : 'rejected';
-          result.textContent = optional ? 'Bazı isteğe bağlı izinler açık kaydedildi.' : 'Reddedildi: reklam, analitik ve meşru menfaat kapalı; zorunlu çerezler korundu.';
+          result.textContent = optional ? 'Some optional consent settings were saved while still enabled.' : 'Declined: advertising, analytics, and legitimate-interest settings are off. Necessary cookies were preserved.';
           result.dataset.stage = 'saved';
         });
       });
       banner.hidden = false;
-      result.textContent = preferencesOnly ? 'Doğrudan ret düğmesi yok. Seçenekleri yönetme akışı bekleniyor…' : 'Çerez penceresi açık. Ret işlemi bekleniyor…';
+      result.textContent = preferencesOnly ? 'No direct rejection option. Waiting for the manage options flow…' : 'Cookie banner shown. Waiting for rejection…';
       result.dataset.choice = 'pending';
       result.dataset.stage = 'intro';
     }
@@ -151,7 +156,7 @@
     document.querySelector('#delayed').addEventListener('click', () => {
       clearTimeout(pending);
       banner.hidden = true;
-      result.textContent = 'Pencere 2 saniye sonra açılacak…';
+      result.textContent = 'The cookie banner will appear in 2 seconds…';
       result.dataset.choice = 'waiting';
       pending = setTimeout(() => show(), 2000);
     });
@@ -161,27 +166,32 @@
       const previous = document.querySelector('#notification-later');
       const fresh = previous.cloneNode(true);
       previous.replaceWith(fresh);
+      const notificationText = notificationTranslations[document.querySelector('#language').value];
+      document.querySelector('#notification-title').textContent = notificationText[0];
+      document.querySelector('#notification-text').textContent = notificationText[1];
+      fresh.textContent = notificationText[2];
+      document.querySelector('#notification-allow').textContent = notificationText[3];
       fresh.addEventListener('click', () => {
         notification.hidden = true;
-        notificationResult.textContent = 'Bildirim isteği ertelendi. Tarayıcıya bildirim izni verilmedi.';
+        notificationResult.textContent = 'Notification request dismissed. No browser notification permission was granted.';
         notificationResult.dataset.choice = 'dismissed';
       });
       notification.hidden = false;
-      notificationResult.textContent = 'Bildirim izni isteği açık. Daha Sonra seçeneği bekleniyor…';
+      notificationResult.textContent = 'Notification request shown. Waiting for dismissal…';
       notificationResult.dataset.choice = 'pending';
     });
     document.querySelector('#notification-allow').addEventListener('click', () => {
       notification.hidden = true;
-      notificationResult.textContent = 'İzin Ver seçildi. Eklenti buna otomatik tıklamamalı.';
+      notificationResult.textContent = 'Allow notifications was selected. The extension should never click this automatically.';
       notificationResult.dataset.choice = 'allowed';
     });
     document.querySelector('#accept').addEventListener('click', () => {
       banner.hidden = true;
-      result.textContent = 'Kabul edildi. Eklenti bu seçeneğe otomatik tıklamamalı.';
+      result.textContent = 'Accepted. The extension should never click this automatically.';
       result.dataset.choice = 'accepted';
     });
     document.querySelector('#unrelated').addEventListener('click', () => {
-      document.querySelector('#unrelated-result').textContent = 'İlgisiz düğmeye tıklandı.';
+      document.querySelector('#unrelated-result').textContent = 'The unrelated button was clicked.';
     });
   </script>
 </body>

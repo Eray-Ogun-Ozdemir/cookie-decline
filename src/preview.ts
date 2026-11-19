@@ -7,8 +7,8 @@ const toggle = document.querySelector<HTMLInputElement>('#preview-enabled')!;
 const status = document.querySelector<HTMLElement>('#preview-status')!;
 const intro = document.querySelector<HTMLElement>('#intro')!;
 controls.hidden = false;
-intro.textContent = 'Eklenti kurmadan dene. Bir dil seçip çerez penceresini aç; otomatik reddetmeyi yukarıdaki anahtarla durdurup yeniden başlatabilirsin.';
-document.title = 'Çerez Reddet · Kurulumsuz önizleme';
+intro.textContent = 'Try it without installing an extension. Choose a consent language and show a banner. Use the switch above to pause or resume automation.';
+document.title = 'Cookie Decline · Install-free preview';
 
 const runner = createRunner(document);
 let timer: ReturnType<typeof setTimeout> | undefined;
@@ -28,7 +28,7 @@ function update() {
   observer.disconnect();
   clearTimeout(timer);
   timer = undefined;
-  status.textContent = toggle.checked ? 'Açık' : 'Duraklatıldı';
+  status.textContent = toggle.checked ? 'On' : 'Paused';
   if (!toggle.checked) return;
   observer.observe(document.documentElement, {
     subtree: true,

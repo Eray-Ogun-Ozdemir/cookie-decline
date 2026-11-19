@@ -17,7 +17,7 @@ const options = {
 if (process.argv.includes('--watch')) {
   const builder = await context(options);
   await builder.watch();
-  console.log('TypeScript değişiklikleri izleniyor. HTML/CSS değişikliklerinde npm run build çalıştırın.');
+  console.log('Watching TypeScript changes. Run npm run build after editing HTML, CSS, or the manifest.');
 } else {
   await build(options);
 }

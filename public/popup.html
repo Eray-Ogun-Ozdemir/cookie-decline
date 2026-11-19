@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Çerez Reddet</title>
+    <title>Cookie Decline</title>
     <link rel="stylesheet" href="popup.css">
     <script src="popup.js" defer></script>
   </head>
@@ -11,31 +11,31 @@
     <main>
       <header>
         <span class="brand-mark" aria-hidden="true">↘</span>
-        <span class="brand">ÇEREZ REDDET</span>
+        <span class="brand">COOKIE DECLINE</span>
         <span class="version">v0.2.1</span>
       </header>
       <section class="intro">
-        <span class="eyebrow">DAHA AZ TIKLAMA</span>
-        <h1>Çerezlere hayır.<br>Gezinmeye devam.</h1>
-        <p>Gereksiz çerezlere onay vermek zorunda değilsin.</p>
+        <span class="eyebrow">FEWER CLICKS. MORE CONTROL.</span>
+        <h1>Decline cookies.<br>Keep browsing.</h1>
+        <p>Your choice shouldn't take a dozen clicks.</p>
       </section>
-      <section class="control" aria-label="Otomatik reddetme ayarı">
+      <section class="control" aria-label="Automatic consent handling">
         <div class="control-top">
-          <span class="status"><span class="dot" aria-hidden="true"></span><span id="status">Yükleniyor…</span></span>
+          <span class="status"><span class="dot" aria-hidden="true"></span><span id="status">Loading…</span></span>
           <label class="switch">
-            <input id="enabled" type="checkbox" role="switch" aria-label="Otomatik çerez reddetme" aria-describedby="state-description" disabled>
+            <input id="enabled" type="checkbox" role="switch" aria-label="Automatically decline optional cookies" aria-describedby="state-description" disabled>
             <span class="track" aria-hidden="true"></span>
           </label>
         </div>
-        <p id="state-description" aria-live="polite">Ayarların okunuyor.</p>
+        <p id="state-description" aria-live="polite">Reading your preferences.</p>
       </section>
       <p id="error" role="alert"></p>
-      <section class="details" aria-label="Desteklenen özellikler">
-        <div><span class="check" aria-hidden="true">✓</span><span>Türkçe · English · Deutsch</span></div>
-        <div><span class="check" aria-hidden="true">✓</span><span>İşlemler tarayıcında gerçekleşir</span></div>
+      <section class="details" aria-label="Supported features">
+        <div><span class="check" aria-hidden="true">✓</span><span>English · Deutsch · Türkçe</span></div>
+        <div><span class="check" aria-hidden="true">✓</span><span>Runs locally in your browser</span></div>
       </section>
-      <aside>Tanınan çerez tercihlerini kapatır, bildirim isteklerini erteler. Belirsiz seçeneklerde durur; her site desteklenmez.</aside>
-      <footer><span class="footer-dot" aria-hidden="true"></span>Senin tarayıcın. Senin tercihin.</footer>
+      <aside>Declines recognized optional consent settings and dismisses notification prompts. Stops at unclear choices. Website coverage varies.</aside>
+      <footer><span class="footer-dot" aria-hidden="true"></span>Your browser. Your choice.</footer>
     </main>
   </body>
 </html>
