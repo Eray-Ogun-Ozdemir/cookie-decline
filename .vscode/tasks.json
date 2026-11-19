@@ -1,0 +1,8 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "Eklentiyi derle", "type": "npm", "script": "build", "group": { "kind": "build", "isDefault": true }, "problemMatcher": [] },
+    { "label": "Kontrolleri çalıştır", "type": "npm", "script": "check", "group": "test", "problemMatcher": [] },
+    { "label": "Deneme sayfasını aç", "type": "npm", "script": "demo", "problemMatcher": [] }
+  ]
+}

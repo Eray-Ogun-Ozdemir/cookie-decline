@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Çerez Reddet · Deneme alanı</title>
+  <style>
+    :root { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #183c36; background: #f6f7f2; }
+    * { box-sizing: border-box; }
+    body { max-width: 900px; margin: 70px auto; padding: 24px; }
+    .eyebrow { font-size: 11px; letter-spacing: 2px; color: #63836a; }
+    h1 { font-size: clamp(32px, 5vw, 54px); letter-spacing: -2px; margin: 18px 0; }
+    p { line-height: 1.7; color: #5a7062; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin: 28px 0; }
+    button { background: #285b41; color: #fff; border: 0; padding: 12px 18px; border-radius: 9px; cursor: pointer; font: inherit; }
+    button:focus-visible, select:focus-visible { outline: 3px solid #527dc1; outline-offset: 3px; }
+    select { background: white; border: 1px solid #becdbd; padding: 10px; border-radius: 9px; font: inherit; }
+    .secondary { color: #285b41; background: #e2eadb; }
+    #result { padding: 18px; background: #e6eddf; border-radius: 12px; min-height: 60px; }
+    .cookie-banner { position: fixed; bottom: 24px; right: 24px; width: min(420px, calc(100% - 48px)); background: white; border: 1px solid #d7dfd1; border-radius: 20px; padding: 26px; box-shadow: 0 15px 70px #183c3624; }
+    .cookie-banner h2 { margin: 0; font-size: 22px; }
+    .cookie-banner .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .negative { margin-top: 40px; border-top: 1px solid #d7dfd1; padding-top: 16px; }
+    [hidden] { display: none !important; }
+    #unrelated-result { font-size: 13px; }
+    .preview-controls { background: #e6eddf; border: 1px solid #cdddc5; padding: 18px 20px; border-radius: 14px; margin-bottom: 32px; display: flex; gap: 16px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+    .preview-controls strong { font-size: 14px; }
+    .preview-controls p { font-size: 12px; margin: 6px 0 0; max-width: 520px; }
+    .preview-controls label { display: flex; gap: 9px; align-items: center; font-size: 13px; cursor: pointer; }
+    .preview-controls input { accent-color: #285b41; width: 20px; height: 20px; }
+    #preview-status { min-width: 80px; }
+  </style>
+</head>
+<body>
+  <section id="preview-controls" class="preview-controls" aria-label="Önizleme kontrolleri" hidden>
+    <div><strong>Kurulumsuz önizleme</strong><p>Bu sayfada eklentiyle aynı ret kuralları çalışır. Diğer siteleri etkilemez; Chrome izinleri ve eklenti menüsü burada sınanmaz.</p></div>
+    <label><input id="preview-enabled" type="checkbox" role="switch" checked aria-label="Önizlemede otomatik reddetme"><span id="preview-status" aria-live="polite">Açık</span></label>
+  </section>
+  <span class="eyebrow">ÇEREZ REDDET / DENEME ALANI</span>
+  <h1>Küçük bir pencere.<br>Daha az uğraş.</h1>
+  <p id="intro">Önce eklentiyi Chrome'a yükle. Bir dil seçip çerez penceresini aç.<br>Eklenti açıkken reddetme seçeneği otomatik uygulanmalı.</p>
+  <div class="toolbar">
+    <select id="language" aria-label="Deneme dili"><option value="tr">Türkçe</option><option value="en">English</option><option value="de">Deutsch</option></select>
+    <button id="show">Pencereyi göster</button>
+    <button id="delayed" class="secondary">2 saniye sonra göster</button>
+    <button id="preferences" class="secondary">Yalnızca tercihler</button>
+  </div>
+  <p id="result" role="status">Bir deneme başlat. Sonuç burada görünecek.</p>
+  <section class="negative">
+    <h2>Yanlış tıklama kontrolü</h2>
+    <p>Bu düğme bir çerez bildiriminin içinde değil. Eklenti buna dokunmamalı.</p>
+    <button id="unrelated" class="secondary">Reject all</button>
+    <p id="unrelated-result">Bu düğmeye henüz tıklanmadı.</p>
+  </section>
+  <div id="cookie-banner" class="cookie-banner" role="dialog" aria-labelledby="banner-title" hidden>
+    <h2 id="banner-title"></h2>
+    <p id="banner-text"></p>
+    <div class="actions">
+      <button id="accept" class="secondary"></button>
+      <button id="reject"></button>
+      <button id="manage" class="secondary" hidden>Tercihleri yönet</button>
+    </div>
+  </div>
+  <script>
+    const translations = {
+      tr: ['Çerez tercihlerin', 'Deneme amaçlı bu çerez penceresi, isteğe bağlı çerezler için izin istiyor.', 'Tümünü kabul et', 'Tümünü reddet'],
+      en: ['Your cookie preferences', 'This demo cookie banner asks permission for optional cookies.', 'Accept all', 'Reject all'],
+      de: ['Deine Cookie-Einstellungen', 'Dieser Cookie-Hinweis bittet um Erlaubnis für optionale Cookies.', 'Alle akzeptieren', 'Alle ablehnen'],
+    };
+    const banner = document.querySelector('#cookie-banner');
+    const result = document.querySelector('#result');
+    let pending;
+    function show(preferencesOnly = false) {
+      clearTimeout(pending);
+      const text = translations[document.querySelector('#language').value];
+      document.querySelector('#banner-title').textContent = text[0];
+      document.querySelector('#banner-text').textContent = text[1];
+      document.querySelector('#accept').textContent = text[2];
+      document.querySelector('#reject').textContent = text[3];
+      // Fresh element for every consent request, as with a newly created site banner.
+      const oldReject = document.querySelector('#reject');
+      const newReject = oldReject.cloneNode(true);
+      oldReject.replaceWith(newReject);
+      newReject.hidden = preferencesOnly;
+      newReject.addEventListener('click', () => {
+        banner.hidden = true;
+        result.textContent = 'Reddedildi: bu denemede isteğe bağlı çerezler kabul edilmedi.';
+        result.dataset.choice = 'rejected';
+      });
+      document.querySelector('#manage').hidden = !preferencesOnly;
+      banner.hidden = false;
+      result.textContent = preferencesOnly ? 'Ret düğmesi yok. İlk sürüm bu pencereye dokunmamalı.' : 'Çerez penceresi açık. Ret işlemi bekleniyor…';
+      result.dataset.choice = 'pending';
+    }
+    document.querySelector('#show').addEventListener('click', () => show());
+    document.querySelector('#delayed').addEventListener('click', () => {
+      clearTimeout(pending);
+      banner.hidden = true;
+      result.textContent = 'Pencere 2 saniye sonra açılacak…';
+      result.dataset.choice = 'waiting';
+      pending = setTimeout(() => show(), 2000);
+    });
+    document.querySelector('#preferences').addEventListener('click', () => show(true));
+    document.querySelector('#accept').addEventListener('click', () => {
+      banner.hidden = true;
+      result.textContent = 'Kabul edildi. Eklenti bu seçeneğe otomatik tıklamamalı.';
+      result.dataset.choice = 'accepted';
+    });
+    document.querySelector('#unrelated').addEventListener('click', () => {
+      document.querySelector('#unrelated-result').textContent = 'İlgisiz düğmeye tıklandı.';
+    });
+  </script>
+</body>
+</html>

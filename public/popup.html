@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Çerez Reddet</title>
+    <link rel="stylesheet" href="popup.css">
+    <script src="popup.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="brand-mark" aria-hidden="true">↘</span>
+        <span class="brand">ÇEREZ REDDET</span>
+        <span class="version">v0.1</span>
+      </header>
+      <section class="intro">
+        <span class="eyebrow">DAHA AZ TIKLAMA</span>
+        <h1>Çerezlere hayır.<br>Gezinmeye devam.</h1>
+        <p>Gereksiz çerezlere onay vermek zorunda değilsin.</p>
+      </section>
+      <section class="control" aria-label="Otomatik reddetme ayarı">
+        <div class="control-top">
+          <span class="status"><span class="dot" aria-hidden="true"></span><span id="status">Yükleniyor…</span></span>
+          <label class="switch">
+            <input id="enabled" type="checkbox" role="switch" aria-label="Otomatik çerez reddetme" aria-describedby="state-description" disabled>
+            <span class="track" aria-hidden="true"></span>
+          </label>
+        </div>
+        <p id="state-description" aria-live="polite">Ayarların okunuyor.</p>
+      </section>
+      <p id="error" role="alert"></p>
+      <section class="details" aria-label="Desteklenen özellikler">
+        <div><span class="check" aria-hidden="true">✓</span><span>Türkçe · English · Deutsch</span></div>
+        <div><span class="check" aria-hidden="true">✓</span><span>İşlemler tarayıcında gerçekleşir</span></div>
+      </section>
+      <aside>İlk sürüm, tanıdığı açık ret düğmelerine tıklar. Tercih menülerini değiştirmez; her site desteklenmez.</aside>
+      <footer><span class="footer-dot" aria-hidden="true"></span>Senin tarayıcın. Senin tercihin.</footer>
+    </main>
+  </body>
+</html>
